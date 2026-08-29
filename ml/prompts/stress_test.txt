@@ -1,0 +1,4 @@
+Given the following financial stress test result, write ONE plain-English sentence explaining what this scenario means for the account holder's financial stability. Mention the months of runway if relevant.
+
+Data:
+{context}

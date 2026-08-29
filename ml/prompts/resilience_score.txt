@@ -1,0 +1,4 @@
+Given the following financial resilience data, write ONE plain-English sentence explaining the score to the account holder. Focus on what the top 1-2 factors mean for their financial stability. Be encouraging but honest.
+
+Data:
+{context}

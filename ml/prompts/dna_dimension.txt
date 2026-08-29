@@ -1,0 +1,4 @@
+Given the following financial DNA dimension data, write ONE plain-English sentence explaining what the score means for this dimension and what it says about the account holder's financial habits.
+
+Data:
+{context}

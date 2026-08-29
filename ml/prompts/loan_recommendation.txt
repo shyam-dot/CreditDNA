@@ -1,0 +1,4 @@
+Given the following loan recommendation data, write ONE plain-English sentence explaining why this borrowing limit is sustainable for the account holder, referencing their income and current obligations.
+
+Data:
+{context}

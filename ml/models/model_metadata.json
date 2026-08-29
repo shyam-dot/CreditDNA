@@ -1,0 +1,29 @@
+{
+  "best_model": "logistic_regression",
+  "feature_names": [
+    "income_to_emi_ratio",
+    "savings_to_monthly_income_ratio",
+    "expense_to_income_ratio",
+    "missed_payment_rate",
+    "employment_tenure_years",
+    "debt_to_income_ratio",
+    "savings_months_of_expenses",
+    "income_volatility",
+    "is_salaried"
+  ],
+  "results": {
+    "logistic_regression": {
+      "cv_auc": 0.9998267511837877,
+      "test_acc": 0.995
+    },
+    "random_forest": {
+      "cv_auc": 0.993777740887942,
+      "test_acc": 0.9466666666666667
+    },
+    "xgboost": {
+      "cv_auc": 0.9961494992831554,
+      "test_acc": 0.9616666666666667
+    }
+  },
+  "model_version": "v1.0"
+}

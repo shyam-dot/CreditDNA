@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-[#0B0F19] text-gray-100 font-sans antialiased selection:bg-[#00D4FF]/30 selection:text-[#00D4FF];
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overflow-x: hidden;
+  }
+
+  /* Custom dark scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #070A10;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 212, 255, 0.4);
+  }
+}
+
+@layer components {
+  /* ── Command Center Glassmorphism ───────────────────────── */
+  .glass-card {
+    background: rgba(17, 24, 39, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card:hover {
+    border-color: rgba(0, 212, 255, 0.25);
+    box-shadow: 0 15px 35px -10px rgba(0, 212, 255, 0.15);
+  }
+
+  .glass-card-gold:hover {
+    border-color: rgba(245, 158, 11, 0.35);
+    box-shadow: 0 15px 35px -10px rgba(245, 158, 11, 0.2);
+  }
+
+  .glass-panel {
+    background: rgba(11, 15, 25, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .terminal-text {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* ── Layout ────────────────────────────────────────────── */
+  .page-shell {
+    @apply min-h-screen bg-[#0B0F19] text-gray-100;
+  }
+
+  .content-container {
+    @apply max-w-6xl mx-auto px-6 py-10;
+  }
+
+  /* ── Cards ─────────────────────────────────────────────── */
+  .card {
+    @apply bg-[#111827] border border-white/10 rounded-2xl p-6 shadow-xl;
+  }
+
+  .card-elevated {
+    @apply bg-[#151D2F] border border-white/15 rounded-2xl p-6 shadow-2xl;
+  }
+
+  /* ── Buttons ────────────────────────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 
+           bg-gradient-to-r from-[#00D4FF] to-[#2DD4BF] text-[#0B0F19] font-bold text-sm
+           px-6 py-3.5 rounded-xl 
+           hover:brightness-110 active:scale-[0.98]
+           shadow-[0_0_20px_rgba(0,212,255,0.35)]
+           transition-all duration-200
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2
+           bg-white/10 text-white font-semibold text-sm
+           px-6 py-3.5 rounded-xl border border-white/10
+           hover:bg-white/15 hover:border-white/20 active:scale-[0.98]
+           transition-all duration-200
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           text-gray-400 font-medium text-sm
+           px-4 py-2 rounded-lg
+           hover:bg-white/5 hover:text-white
+           transition-all duration-150;
+  }
+
+  /* ── Form inputs ────────────────────────────────────────── */
+  .input-field {
+    @apply w-full border border-white/10 rounded-xl px-4 py-3 
+           text-sm text-white placeholder:text-gray-500
+           focus:outline-none focus:ring-2 focus:ring-[#00D4FF]/30 focus:border-[#00D4FF]
+           transition-all duration-150 bg-[#111827];
+  }
+
+  .input-label {
+    @apply block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5;
+  }
+
+  /* ── Score bands ────────────────────────────────────────── */
+  .band-strong {
+    @apply text-emerald-400 bg-emerald-950/60 border border-emerald-500/30;
+  }
+
+  .band-moderate {
+    @apply text-amber-400 bg-amber-950/60 border border-amber-500/30;
+  }
+
+  .band-weak {
+    @apply text-rose-400 bg-rose-950/60 border border-rose-500/30;
+  }
+
+  /* ── DNA dimension bar ──────────────────────────────────── */
+  .dna-bar-track {
+    @apply h-2 bg-gray-800 rounded-full overflow-hidden;
+  }
+
+  .dna-bar-fill {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+  }
+
+  /* ── Divider ────────────────────────────────────────────── */
+  .divider {
+    @apply border-t border-white/10 my-6;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 25px rgba(0, 212, 255, 0.35);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
+  }
+
+  .text-glow-cyan {
+    text-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+  }
+
+  .animate-in {
+    animation: slideUp 0.4s ease-out;
+  }
+}
