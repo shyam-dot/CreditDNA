@@ -1,0 +1,19 @@
+[project]
+name = "creditdna-api"
+version = "1.0.0"
+description = "CreditDNA FastAPI Backend for Vercel Serverless"
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn>=0.30.1",
+    "pydantic>=2.7.1",
+    "pydantic-settings>=2.3.0",
+    "firebase-admin>=6.5.0",
+    "python-jose>=3.3.0",
+    "httpx>=0.27.0",
+    "python-multipart>=0.0.9",
+    "numpy>=1.26.4",
+    "requests>=2.32.3",
+    "python-dotenv>=1.0.1",
+]
