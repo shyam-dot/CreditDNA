@@ -35,6 +35,50 @@
       "employment_tenure_months": 24,
       "missed_payments_last_year": 0,
       "note": "Initial Financial Baseline"
+    },
+    "doc_1788054511494": {
+      "timestamp": "2026-08-30T07:18:31.494982",
+      "monthly_income": 85000.0,
+      "monthly_expenses_total": 35000.0,
+      "emi_amount": 12000.0,
+      "savings_balance": 1000.0,
+      "income_type": "salaried",
+      "employment_tenure_months": 25,
+      "missed_payments_last_year": 0,
+      "note": "Month Snapshot Simulation"
+    },
+    "doc_1788054523075": {
+      "timestamp": "2026-08-30T07:18:43.075890",
+      "monthly_income": 50000.0,
+      "monthly_expenses_total": 35000.0,
+      "emi_amount": 12000.0,
+      "savings_balance": 1000.0,
+      "income_type": "salaried",
+      "employment_tenure_months": 25,
+      "missed_payments_last_year": 0,
+      "note": "Month Snapshot Simulation"
+    },
+    "doc_1788055226190": {
+      "timestamp": "2026-08-30T07:30:26.190845",
+      "monthly_income": 50000.0,
+      "monthly_expenses_total": 35000.0,
+      "emi_amount": 12000.0,
+      "savings_balance": 1000.0,
+      "income_type": "salaried",
+      "employment_tenure_months": 25,
+      "missed_payments_last_year": 0,
+      "note": "Month Snapshot Simulation"
+    },
+    "doc_1788055801578": {
+      "timestamp": "2026-08-30T07:40:01.578396",
+      "monthly_income": 500000.0,
+      "monthly_expenses_total": 35000.0,
+      "emi_amount": 12000.0,
+      "savings_balance": 10000.0,
+      "income_type": "salaried",
+      "employment_tenure_months": 25,
+      "missed_payments_last_year": 0,
+      "note": "Month Snapshot Simulation"
     }
   },
   "users_WP7FfIMjJOesObbSW4J5p0q2POp1_scores": {
@@ -44,6 +88,72 @@
       "band": "strong",
       "monthly_income": 85000.0,
       "savings_balance": 180000.0
+    },
+    "doc_1788054511556": {
+      "timestamp": "2026-08-30T07:18:31.494982",
+      "score": 39.1,
+      "band": "weak",
+      "monthly_income": 85000.0,
+      "savings_balance": 1000.0
+    },
+    "doc_1788054523110": {
+      "timestamp": "2026-08-30T07:18:43.075890",
+      "score": 10.2,
+      "band": "weak",
+      "monthly_income": 50000.0,
+      "savings_balance": 1000.0
+    },
+    "doc_1788055226209": {
+      "timestamp": "2026-08-30T07:30:26.190845",
+      "score": 10.2,
+      "band": "weak",
+      "monthly_income": 50000.0,
+      "savings_balance": 1000.0
+    },
+    "doc_1788055801591": {
+      "timestamp": "2026-08-30T07:40:01.578396",
+      "score": 55.5,
+      "band": "moderate",
+      "monthly_income": 500000.0,
+      "savings_balance": 10000.0
+    }
+  },
+  "stress_test_results": {
+    "doc_1788054533938": {
+      "userId": "WP7FfIMjJOesObbSW4J5p0q2POp1",
+      "scenario": "income_drop",
+      "magnitude": 0.3,
+      "original_score": 10.2,
+      "perturbed_score": 10.8,
+      "score_delta": 0.6,
+      "months_to_distress": 0.1,
+      "outcome_summary": "A 30% income drop would exhaust savings in 0 months \u2014 immediate action needed.",
+      "explanation_text": "A Income Drop at this level would put pressure on your finances within 0 months.",
+      "created_at": "2026-08-30T07:18:53.938297"
+    },
+    "doc_1788054545371": {
+      "userId": "WP7FfIMjJOesObbSW4J5p0q2POp1",
+      "scenario": "income_drop",
+      "magnitude": 0.3,
+      "original_score": 10.2,
+      "perturbed_score": 10.8,
+      "score_delta": 0.6,
+      "months_to_distress": 0.1,
+      "outcome_summary": "A 30% income drop would exhaust savings in 0 months \u2014 immediate action needed.",
+      "explanation_text": "A Income Drop at this level would put pressure on your finances within 0 months.",
+      "created_at": "2026-08-30T07:19:05.371518"
+    },
+    "doc_1788055805926": {
+      "userId": "WP7FfIMjJOesObbSW4J5p0q2POp1",
+      "scenario": "income_drop",
+      "magnitude": 0.3,
+      "original_score": 55.5,
+      "perturbed_score": 55.0,
+      "score_delta": -0.5,
+      "months_to_distress": null,
+      "outcome_summary": "Even after a 30% income drop, you maintain a positive monthly surplus. Resilience score: 55.0.",
+      "explanation_text": "Your resilience score drops by 0 points under this scenario, but you have enough buffer to manage.",
+      "created_at": "2026-08-30T07:40:05.926340"
     }
   }
 }

@@ -53,21 +53,26 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 See [`docs/setup.md`](docs/setup.md) for the complete setup guide.
 
-## Tech Stack
+## Deploy to Vercel
 
-- **Frontend:** React 18 + TypeScript + Tailwind CSS + Recharts + Firebase Web SDK
-- **Backend:** Python 3.11 + FastAPI + Firebase Admin SDK (Firestore & Auth)
-- **Database & Storage:** Google Cloud Firestore + Firebase Storage
-- **Authentication:** Firebase Authentication
-- **ML Engine:** scikit-learn · Random Forest · XGBoost · SHAP
-- **LLM Engine:** Llama 3.1 via Ollama (local) or Groq/Together AI (cloud)
+### Deploying the Frontend to Vercel
 
-## Demo Accounts
-
-| Account | Profile | Expected Score |
-|---------|---------|---------------|
-| Aisha Verma (HDFC ••••4821) | Salaried, ₹85K/mo, zero missed payments | ~78 (Strong) |
-| Rahul Nair (Axis ••••3307) | Freelance, ₹42K/mo, 2 missed payments | ~47 (Moderate) |
-
-See [`docs/demo-script.md`](docs/demo-script.md) for the full demo walkthrough.
+1. Push this repository to GitHub: `https://github.com/shyam-dot/CreditDNA`
+2. Go to [Vercel](https://vercel.com) and click **"Add New Project"** -> **"Import Git Repository"**.
+3. Select the `CreditDNA` repository.
+4. Configure the project:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `./` (or `frontend`)
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `frontend/dist` (or `dist` if root directory is set to `frontend`)
+5. Add Environment Variables in Vercel Project Settings:
+   - `VITE_API_BASE_URL`: Your deployed backend API URL (e.g., Render/Railway/Cloud Run) or local URL.
+   - `VITE_FIREBASE_API_KEY`: Your Firebase web API key
+   - `VITE_FIREBASE_AUTH_DOMAIN`: `credit-dna.firebaseapp.com`
+   - `VITE_FIREBASE_PROJECT_ID`: `credit-dna`
+   - `VITE_FIREBASE_STORAGE_BUCKET`: `credit-dna.firebasestorage.app`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`: `1001502583985`
+   - `VITE_FIREBASE_APP_ID`: `1:1001502583985:web:33adaaf67bb095d0750690`
+   - `VITE_FIREBASE_MEASUREMENT_ID`: `G-NQTG2H4Y8V`
+6. Click **Deploy**.
 
