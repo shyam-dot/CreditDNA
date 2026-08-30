@@ -1,17 +1,17 @@
-"""POST /api/auth/sync — create or upsert a Firestore User document after Firebase signup/login."""
+"""POST /api/auth/sync — create or upsert a User document after Firebase signup/login."""
 from fastapi import APIRouter, Depends
 from datetime import datetime
 
 from app.database import get_db
-from app import models, schemas
+from app import schemas
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 @router.post("/sync", response_model=schemas.AuthSyncResponse)
 def sync_user(payload: schemas.AuthSyncRequest, db=Depends(get_db)):
-    """Called by the frontend immediately after Firebase Google login.
-    Creates or updates the Firestore user document (idempotent).
+    """Called by the frontend immediately after Firebase Google/Email login.
+    Creates or updates the user document (idempotent, instant response).
     """
     user_ref = db.collection("users").document(payload.firebase_uid)
     doc = user_ref.get()
@@ -38,4 +38,3 @@ def sync_user(payload: schemas.AuthSyncRequest, db=Depends(get_db)):
         has_onboarded=has_onboarded,
         has_linked_account=True,
     )
-
