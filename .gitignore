@@ -13,11 +13,16 @@ dist/
 build/
 .eggs/
 
-# Environment files (Allowed to be committed per user request)
-# .env
+# Environment files
+.env
+.env.local
+*.env
+!*.env.example
 
-# Firebase service account keys (Allowed to be committed per user request)
-# firebase-service-account.json
+# Firebase service account keys
+firebase-service-account.json
+**/firebase-service-account.json
+!firebase-service-account.example.json
 
 # ML model artifacts (large binaries)
 ml/models/*.joblib
