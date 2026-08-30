@@ -1,0 +1,26 @@
+# Python virtualenvs & cache
+venv/
+**/venv/
+.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Local storage & databases
+local_db.json
+backend/local_db.json
+*.db
+*.sqlite3
+
+# Lockfiles not needed for serverless
+uv.lock
+
+# ML binary models
+ml/models/*.joblib
+ml/models/*.pkl
+**/*.joblib
+**/*.pkl
+
+# Docs & Demo
+demo/
+docs/
