@@ -1,14 +1,15 @@
 """POST /api/stress-test — perturb inputs and recompute resilience score live with Firestore."""
 import sys, os
 from datetime import datetime
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../ml"))
+ml_dir = os.path.join(os.path.dirname(__file__), "../../../ml")
+if ml_dir not in sys.path:
+    sys.path.insert(0, ml_dir)
 
 from fastapi import APIRouter, Depends
-
 from app.database import get_db
 from app.dependencies import get_current_user
 from app import models, schemas
-from app.routes.utils import get_linked_demo_account, score_to_band
+from app.routes.dashboard import get_dashboard
 
 router = APIRouter(prefix="/api", tags=["stress-test"])
 
@@ -26,17 +27,31 @@ def run_stress_test(
     current_user: models.User = Depends(get_current_user),
     db=Depends(get_db),
 ):
-    from features import compute_features, compute_dna_scores, compute_resilience_score
     from simulator import run_stress_simulation
     from llm_client import generate_explanation
 
-    demo = get_linked_demo_account(current_user, db)
-    profile = demo.financial_profile
-    original_score = float(demo.resilience_score.score)
+    dash = get_dashboard(current_user=current_user, db=db)
+    user_ref = db.collection("users").document(current_user.firebase_uid)
+    entries = list(user_ref.collection("entries").stream())
+    
+    if entries:
+        latest_entry = max([e.to_dict() for e in entries], key=lambda e: e.get("timestamp", ""))
+    else:
+        latest_entry = {
+            "monthly_income": 85000.0,
+            "monthly_expenses_total": 35000.0,
+            "emi_amount": 15000.0,
+            "savings_balance": 200000.0,
+            "income_type": "salaried",
+            "employment_tenure_months": 24,
+            "missed_payments_last_year": 0,
+        }
 
-    # Perturb the profile and recompute
+    original_score = dash.resilience_score.score if dash.resilience_score else 75.0
+
+    # Run stress simulation
     result = run_stress_simulation(
-        profile=profile,
+        profile=latest_entry,
         scenario=payload.scenario,
         magnitude=payload.magnitude,
         original_score=original_score,
@@ -54,11 +69,10 @@ def run_stress_test(
     }
     explanation = generate_explanation(ctx, "stress_test")
 
-    # Record simulation result into Firestore stress_test_results
+    # Record simulation result into Firestore
     try:
         db.collection("stress_test_results").add({
             "userId": current_user.firebase_uid,
-            "demo_account_id": demo.id,
             "scenario": payload.scenario,
             "magnitude": payload.magnitude,
             "original_score": original_score,
@@ -82,4 +96,3 @@ def run_stress_test(
         outcome_summary=result["outcome_summary"],
         explanation_text=explanation,
     )
-

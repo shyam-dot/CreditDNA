@@ -2,13 +2,13 @@ import axios from 'axios';
 import { auth } from './firebase';
 import type {
   AuthSyncResponse,
-  DemoAccount,
   DashboardData,
   FinancialDNA,
   StressTestRequest,
   StressTestResult,
   LoanRecommendation,
 } from './types';
+
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -42,15 +42,13 @@ export async function syncUser(
   return data;
 }
 
-// ── Demo Accounts ─────────────────────────────────────────────────────────────
+// ── Financial Entries ─────────────────────────────────────────────────────────
 
-export async function getDemoAccounts(): Promise<DemoAccount[]> {
-  const { data } = await api.get<DemoAccount[]>('/api/demo-accounts');
+export async function createFinancialEntry(
+  payload: import('./types').FinancialEntryCreate
+): Promise<DashboardData> {
+  const { data } = await api.post<DashboardData>('/api/entries', payload);
   return data;
-}
-
-export async function linkAccount(demo_account_id: string): Promise<void> {
-  await api.post('/api/link-account', { demo_account_id });
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────

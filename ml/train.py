@@ -21,62 +21,52 @@ MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 
-def generate_synthetic_dataset(n_samples: int = 2000, seed: int = 42):
+def generate_synthetic_dna_dataset(n_samples: int = 3000, seed: int = 42):
     """
-    Generate a synthetic labeled dataset of financial profiles.
-    Label: 1 = resilient (score >= 60), 0 = not resilient.
+    Generate synthetic dataset mapping 6 Financial DNA dimensions (0.0 to 1.0)
+    to a binary outcome (1 = Resilient/Stable, 0 = Distressed/At-Risk).
     """
     rng = np.random.RandomState(seed)
     X = []
     y = []
 
     for _ in range(n_samples):
-        income = rng.uniform(20000, 200000)
-        emi = rng.uniform(0, income * 0.6)
-        savings = rng.uniform(0, income * 30)
-        expenses = rng.uniform(income * 0.2, income * 0.9)
-        missed = rng.choice([0, 0, 0, 0, 1, 2, 3, 4, 5], p=[0.4, 0.2, 0.15, 0.1, 0.06, 0.04, 0.02, 0.02, 0.01])
-        tenure_months = rng.randint(0, 180)
-        income_type = rng.choice(["salaried", "freelance"], p=[0.6, 0.4])
-        total_loans = rng.uniform(0, income * 20)
-        volatility = rng.uniform(0, 0.8) if income_type == "freelance" else rng.uniform(0, 0.2)
+        # 6 DNA dimension scores (scaled 0 to 1)
+        income_stability = rng.uniform(0.1, 1.0)
+        cash_flow_health = rng.uniform(0.0, 1.0)
+        debt_pressure = rng.uniform(0.0, 1.0)
+        savings_resilience = rng.uniform(0.0, 1.0)
+        spending_stability = rng.uniform(0.2, 1.0)
+        payment_discipline = rng.choice([0.2, 0.4, 0.6, 0.8, 1.0], p=[0.1, 0.1, 0.15, 0.25, 0.4])
 
-        income_to_emi = min(income / max(emi, 1), 10.0) / 10.0
-        savings_to_income = min(savings / max(income, 1), 24.0) / 24.0
-        expense_to_income = min(expenses / max(income, 1), 2.0) / 2.0
-        missed_rate = min(missed / 12.0, 1.0)
-        tenure_years = min(tenure_months / 12.0, 10.0) / 10.0
-        debt_to_income = min(total_loans / max(income * 12, 1), 10.0) / 10.0
-        savings_months = min(savings / max(expenses + emi, 1), 24.0) / 24.0
-        is_salaried = 1.0 if income_type == "salaried" else 0.0
-
-        features = [
-            income_to_emi, savings_to_income, expense_to_income,
-            missed_rate, tenure_years, debt_to_income,
-            savings_months, volatility, is_salaried
+        dna_features = [
+            income_stability,
+            cash_flow_health,
+            debt_pressure,
+            savings_resilience,
+            spending_stability,
+            payment_discipline,
         ]
-        X.append(features)
+        X.append(dna_features)
 
-        # Label logic: resilient if good income buffer, savings, and no missed payments
-        score = (
-            income_to_emi * 25
-            + savings_to_income * 20
-            + (1 - expense_to_income) * 15
-            + (1 - missed_rate) * 15
-            + tenure_years * 10
-            + (1 - debt_to_income) * 10
-            + savings_months * 15
-            + is_salaried * 5
-            - volatility * 10
+        # Weighted combination for ground truth label
+        composite = (
+            income_stability * 0.25 +
+            cash_flow_health * 0.22 +
+            debt_pressure * 0.20 +
+            savings_resilience * 0.18 +
+            spending_stability * 0.08 +
+            payment_discipline * 0.15 +
+            rng.normal(0, 0.04) # Add realistic noise
         )
-        y.append(1 if score > 60 else 0)
+        y.append(1 if composite >= 0.52 else 0)
 
     return np.array(X, dtype=np.float32), np.array(y)
 
 
 def train():
-    print("Generating synthetic dataset...")
-    X, y = generate_synthetic_dataset(n_samples=3000)
+    print("Generating synthetic Financial DNA dataset for Logistic Regression...")
+    X, y = generate_synthetic_dna_dataset(n_samples=4000)
     print(f"Dataset shape: {X.shape}, class balance: {y.mean():.2%} resilient")
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -103,32 +93,35 @@ def train():
         cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring="roc_auc")
         model.fit(X_train, y_train)
         test_score = model.score(X_test, y_test)
-        results[name] = {"cv_auc": cv_scores.mean(), "test_acc": test_score}
+        results[name] = {"cv_auc": float(cv_scores.mean()), "test_acc": float(test_score)}
         print(f"  CV AUC: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
         print(f"  Test accuracy: {test_score:.3f}")
         print(classification_report(y_test, model.predict(X_test)))
         joblib.dump(model, os.path.join(MODELS_DIR, f"{name}.joblib"))
 
-    # Pick best by CV AUC
-    best_name = max(results, key=lambda n: results[n]["cv_auc"])
-    print(f"\nBest model: {best_name} (CV AUC: {results[best_name]['cv_auc']:.3f})")
+    # Print learned Logistic Regression weights
+    lr_pipe = models["logistic_regression"]
+    lr_coefs = lr_pipe.named_steps["clf"].coef_[0]
+    dna_names = ["income_stability", "cash_flow_health", "debt_pressure", "savings_resilience", "spending_stability", "payment_discipline"]
+    print("\nLearned Logistic Regression Dimension Weights:")
+    for name, coef in zip(dna_names, lr_coefs):
+        print(f"  {name}: {coef:.4f}")
 
-    # Save a symlink / copy as "best_model.joblib"
-    best_path = os.path.join(MODELS_DIR, f"{best_name}.joblib")
+    # Save best model
+    best_path = os.path.join(MODELS_DIR, "logistic_regression.joblib")
     best_out = os.path.join(MODELS_DIR, "best_model.joblib")
     import shutil
     shutil.copy2(best_path, best_out)
 
-    # Save metadata
     meta = {
-        "best_model": best_name,
-        "feature_names": FEATURE_NAMES,
+        "best_model": "logistic_regression",
+        "feature_names": dna_names,
         "results": results,
-        "model_version": "v1.0",
+        "model_version": "v2.0-learned",
     }
     with open(os.path.join(MODELS_DIR, "model_metadata.json"), "w") as f:
         json.dump(meta, f, indent=2)
-    print(f"Models saved to {MODELS_DIR}")
+    print(f"Logistic Regression model trained and saved to {MODELS_DIR}")
 
 
 if __name__ == "__main__":

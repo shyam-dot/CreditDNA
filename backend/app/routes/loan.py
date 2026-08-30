@@ -1,11 +1,11 @@
 """GET /api/loan-recommendation — sustainable borrowing limit + LLM explanation."""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 
 from app.database import get_db
 from app.dependencies import get_current_user
 from app import models, schemas
-from app.routes.utils import get_linked_demo_account
+from app.routes.dashboard import get_dashboard
 
 router = APIRouter(prefix="/api", tags=["loan"])
 
@@ -15,21 +15,7 @@ def get_loan_recommendation(
     current_user: models.User = Depends(get_current_user),
     db=Depends(get_db),
 ):
-    demo = get_linked_demo_account(current_user, db)
-    rec = demo.loan_recommendation
-
-    computed_at = rec.computed_at
-    if isinstance(computed_at, str):
-        try:
-            computed_at = datetime.fromisoformat(computed_at)
-        except Exception:
-            computed_at = datetime.utcnow()
-
-    return schemas.LoanRecommendationOut(
-        sustainable_limit=float(rec.sustainable_limit),
-        max_safe_emi=float(rec.max_safe_emi),
-        recommended_tenure_months=int(rec.recommended_tenure_months),
-        explanation_text=rec.explanation_text or "",
-        computed_at=computed_at or datetime.utcnow(),
-    )
-
+    dash = get_dashboard(current_user=current_user, db=db)
+    if not dash.loan_recommendation:
+        raise HTTPException(status_code=400, detail="User has not onboarded financial data yet.")
+    return dash.loan_recommendation

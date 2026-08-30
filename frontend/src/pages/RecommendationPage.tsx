@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Info, ShieldCheck, CreditCard } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Info, CreditCard } from 'lucide-react';
 import { getLoanRecommendation, getDashboard } from '../lib/api';
 import type { LoanRecommendation } from '../lib/types';
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="py-4 border-b border-white/10 last:border-0 font-mono">
-      <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-2xl font-extrabold text-white tabular-nums">{value}</p>
+    <div className="py-4 border-b border-white/10 last:border-0">
+      <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-2xl font-extrabold text-white font-mono tabular-nums">{value}</p>
       {sub && <p className="text-xs text-[#00D4FF] mt-0.5">{sub}</p>}
     </div>
   );
@@ -46,7 +46,7 @@ export default function RecommendationPage() {
 
   if (!rec) {
     return (
-      <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center font-mono text-xs">
+      <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center text-xs font-sans">
         <p className="text-gray-400">No recommendation available.</p>
         <button onClick={() => navigate('/dashboard')} className="btn-secondary mt-4">Return to Dashboard</button>
       </div>
@@ -54,7 +54,7 @@ export default function RecommendationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-gray-100 selection:bg-[#00D4FF]/30 selection:text-[#00D4FF]">
+    <div className="min-h-screen bg-[#0B0F19] text-gray-100 font-sans selection:bg-[#00D4FF]/30 selection:text-[#00D4FF]">
       <div className="max-w-4xl mx-auto px-6 py-10">
         {/* Header */}
         <header className="flex items-center gap-4 mb-8 pb-4 border-b border-white/10">
@@ -66,9 +66,9 @@ export default function RecommendationPage() {
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 className="text-xl font-space font-bold text-white">Sustainable Borrowing Ceiling</h1>
-            <p className="text-xs font-mono text-gray-400 mt-0.5">
-              ML-driven debt capacity evaluation
+            <h1 className="text-xl font-bold text-white">Sustainable Borrowing Ceiling</h1>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Explainable debt capacity evaluation
             </p>
           </div>
         </header>
@@ -76,17 +76,17 @@ export default function RecommendationPage() {
         {/* Hero stat */}
         <section className="glass-card p-8 text-center mb-6 border border-white/10 animate-fade-in relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#00D4FF]/10 blur-3xl rounded-full pointer-events-none" />
-          <p className="text-xs font-mono font-bold text-gray-400 uppercase tracking-widest mb-4">
-            // RECOMMENDED BORROWING LIMIT
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
+            Recommended Borrowing Limit
           </p>
-          <p className="text-5xl sm:text-6xl font-mono font-extrabold text-white tracking-tight text-glow-cyan">
+          <p className="text-5xl sm:text-6xl font-extrabold text-white tracking-tight font-mono text-glow-cyan">
             ₹{(rec.sustainable_limit / 100000).toFixed(1)}L
           </p>
-          <p className="text-xs font-mono text-gray-300 mt-3">
-            Based on your Financial Resilience Score of <span className="text-[#00D4FF] font-bold">{resilienceScore?.toFixed(1) ?? '—'} / 100</span>
+          <p className="text-xs text-gray-300 mt-3 font-sans">
+            Based on your Financial Resilience Score of <span className="text-[#00D4FF] font-bold font-mono">{resilienceScore?.toFixed(1) ?? '—'} / 100</span>
           </p>
           {rec.explanation_text && (
-            <p className="mt-5 text-xs text-gray-300 leading-relaxed max-w-md mx-auto font-sans bg-white/5 p-4 rounded-xl border border-white/5">
+            <p className="mt-5 text-xs text-gray-300 leading-relaxed max-w-md mx-auto bg-white/5 p-4 rounded-xl border border-white/5">
               "{rec.explanation_text}"
             </p>
           )}
@@ -111,15 +111,15 @@ export default function RecommendationPage() {
           />
         </section>
 
-        {/* How we calculated this */}
+        {/* Underwriting Methodology */}
         <section className="glass-card p-6 border border-white/10 animate-slide-up space-y-6">
           <div className="flex items-center gap-2 border-b border-white/10 pb-4">
             <Info size={16} className="text-[#00D4FF]" />
-            <p className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-              UNDERWRITING METHODOLOGY
+            <p className="text-xs font-bold text-white uppercase tracking-wider">
+              Underwriting Methodology
             </p>
           </div>
-          <div className="space-y-3 font-sans text-xs">
+          <div className="space-y-3 text-xs">
             {HOW_IT_WORKS.map((point, i) => (
               <div key={i} className="flex items-start gap-3">
                 <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
@@ -127,9 +127,9 @@ export default function RecommendationPage() {
               </div>
             ))}
           </div>
-          <div className="p-4 bg-white/5 rounded-xl border border-white/5 font-mono text-xs text-gray-400">
+          <div className="p-4 bg-white/5 rounded-xl border border-white/5 text-xs text-gray-400">
             <p className="leading-relaxed">
-              <strong className="text-white">Note:</strong> This is a dynamic financial resilience estimate generated by CreditDNA. Final loan sanction is subject to lender approval and bureau verification.
+              <strong className="text-white">Note:</strong> This is a dynamic financial resilience estimate generated by CreditDNA based on your cash flow and liquidity buffer.
             </p>
           </div>
         </section>

@@ -1,53 +1,60 @@
 # Dependencies
 node_modules/
+**/node_modules/
 __pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
 *.egg-info/
 dist/
+**/dist/
 build/
 .eggs/
 
-# Environment
+# Environment files
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 *.env
 
-# Firebase service account (NEVER commit this)
+# Firebase service account keys (NEVER commit credentials)
 firebase-service-account.json
+*firebase-service-account.json
+**/*firebase-service-account.json
 *-service-account.json
+**/*-service-account.json
 
 # ML model artifacts (large binaries)
 ml/models/*.joblib
 ml/models/*.pkl
+**/*.joblib
+**/*.pkl
 
-# Vite build
+# Vite & build outputs
 frontend/dist/
 frontend/.vite/
+.vite/
 
-# IDEs
+# Python virtual environments
+venv/
+**/venv/
+venv2/
+venv3/
+.venv/
+**/env/
+**/venv*/
+
+# IDEs & OS
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
 .DS_Store
 Thumbs.db
 
 # Logs
 *.log
 logs/
-
-# Docker
 .docker/
-
-# Python virtual envs
-venv/
-venv2/
-venv3/
-.venv/
-env/

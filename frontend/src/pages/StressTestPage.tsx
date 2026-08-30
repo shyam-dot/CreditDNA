@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { ArrowLeft, Zap, Clock, TrendingDown, Cpu, Sparkles } from 'lucide-react';
+import { ArrowLeft, Zap, Clock, TrendingDown, Sparkles, ShieldAlert } from 'lucide-react';
 import { runStressTest, getDashboard } from '../lib/api';
 import type { ScenarioType, StressTestResult } from '../lib/types';
 
@@ -16,9 +16,9 @@ interface Scenario {
 
 const SCENARIOS: Scenario[] = [
   { id: 'income_drop', label: 'Income Drop', description: 'Salary or revenue reduction', icon: '📉' },
-  { id: 'job_loss', label: 'Job Loss', description: 'Complete loss of income', icon: '🚧' },
-  { id: 'emergency_expense', label: 'Emergency Expense', description: 'Unplanned large expense', icon: '🏥' },
-  { id: 'emi_increase', label: 'EMI Increase', description: 'Rising loan obligations', icon: '📈' },
+  { id: 'job_loss', label: 'Job Loss', description: 'Complete income disruption', icon: '🚧' },
+  { id: 'emergency_expense', label: 'Emergency Expense', description: 'Unplanned medical or asset shock', icon: '🏥' },
+  { id: 'emi_increase', label: 'EMI Increase', description: 'Interest rate hike or rising debt obligations', icon: '📈' },
 ];
 
 const MAGNITUDE_LABELS: Record<number, string> = {
@@ -36,10 +36,10 @@ function ScoreChangeBar({ original, perturbed }: { original: number; perturbed: 
   const isNegative = delta < 0;
 
   return (
-    <div className="flex flex-col gap-2 font-mono">
+    <div className="flex flex-col gap-2 font-sans">
       <div className="flex items-center justify-between text-xs text-gray-400">
-        <span>BASELINE: {original}</span>
-        <span className={`font-bold text-base ${isNegative ? 'text-rose-400' : 'text-emerald-400'}`}>
+        <span>Baseline Score: <strong className="text-white font-mono">{original}</strong></span>
+        <span className={`font-bold text-base font-mono ${isNegative ? 'text-rose-400' : 'text-emerald-400'}`}>
           {perturbed.toFixed(0)}
           <span className={`text-xs ml-1.5 ${isNegative ? 'text-rose-400' : 'text-emerald-400'}`}>
             ({isNegative ? '' : '+'}{delta.toFixed(0)})
@@ -60,7 +60,7 @@ function ScoreChangeBar({ original, perturbed }: { original: number; perturbed: 
         />
       </div>
 
-      <div className="flex items-center justify-between text-[10px] text-gray-500">
+      <div className="flex items-center justify-between text-[11px] text-gray-500">
         <span>0</span>
         <span className="text-gray-300 font-medium">Original Baseline: {original}</span>
         <span>100</span>
@@ -69,14 +69,14 @@ function ScoreChangeBar({ original, perturbed }: { original: number; perturbed: 
   );
 }
 
-// Build a simple time-series projection for the area chart
+// Build a time-series projection for the area chart
 function buildChartData(originalScore: number, perturbedScore: number, monthsToDistress: number | null) {
   const data = [];
   const months = 12;
   for (let m = 0; m <= months; m++) {
     const score = Math.max(0, originalScore - (originalScore - perturbedScore) * (m / 3));
-    data.push({ month: `M${m}`, score: Math.round(Math.max(0, score)) });
-    if (monthsToDistress && m >= monthsToDistress) break;
+    data.push({ month: `Month ${m}`, score: Math.round(Math.max(0, score)) });
+    if (monthsToDistress !== null && m >= monthsToDistress) break;
   }
   return data;
 }
@@ -110,7 +110,7 @@ export default function StressTestPage() {
 
   // Auto-run on scenario/magnitude change (debounced)
   useEffect(() => {
-    const t = setTimeout(() => { runTest(); }, 400);
+    const t = setTimeout(() => { runTest(); }, 350);
     return () => clearTimeout(t);
   }, [runTest]);
 
@@ -121,7 +121,7 @@ export default function StressTestPage() {
   const isJobLoss = selectedScenario === 'job_loss';
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-gray-100 selection:bg-[#00D4FF]/30 selection:text-[#00D4FF]">
+    <div className="min-h-screen bg-[#0B0F19] text-gray-100 font-sans selection:bg-[#00D4FF]/30 selection:text-[#00D4FF]">
       <div className="max-w-4xl mx-auto px-6 py-10">
         {/* Header */}
         <header className="flex items-center gap-4 mb-8 pb-4 border-b border-white/10">
@@ -133,8 +133,8 @@ export default function StressTestPage() {
             <ArrowLeft size={18} />
           </button>
           <div>
-            <h1 className="text-xl font-space font-bold text-white">AI Financial Stress Simulator</h1>
-            <p className="text-xs font-mono text-gray-400 mt-0.5">
+            <h1 className="text-xl font-bold text-white">Financial Stress Test Simulator</h1>
+            <p className="text-xs text-gray-400 mt-0.5">
               Simulate macroeconomic & emergency shocks on your resilience profile
             </p>
           </div>
@@ -142,7 +142,7 @@ export default function StressTestPage() {
 
         {/* Scenario selector */}
         <section className="mb-6 space-y-3">
-          <p className="text-xs font-mono font-bold text-gray-400 uppercase tracking-wider">// CHOOSE SHOCK SCENARIO</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Choose Shock Scenario</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {SCENARIOS.map((s) => {
               const isSelected = selectedScenario === s.id;
@@ -151,7 +151,7 @@ export default function StressTestPage() {
                   key={s.id}
                   id={`scenario-${s.id}`}
                   onClick={() => setSelectedScenario(s.id)}
-                  className={`p-4 rounded-2xl border text-left transition-all duration-150 active:scale-[0.98] font-mono ${
+                  className={`p-4 rounded-2xl border text-left transition-all duration-150 active:scale-[0.98] ${
                     isSelected
                       ? 'border-[#00D4FF] bg-[#151D2F] text-white shadow-[0_0_20px_rgba(0,212,255,0.2)]'
                       : 'border-white/10 bg-white/5 hover:border-white/20 text-gray-300'
@@ -161,7 +161,7 @@ export default function StressTestPage() {
                   <p className={`text-sm font-bold ${isSelected ? 'text-[#00D4FF]' : 'text-white'}`}>
                     {s.label}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5 font-sans">
+                  <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">
                     {s.description}
                   </p>
                 </button>
@@ -172,10 +172,10 @@ export default function StressTestPage() {
 
         {/* Magnitude slider (hidden for job loss) */}
         {!isJobLoss && (
-          <section className="glass-card p-6 mb-6 border border-white/10 font-mono text-xs">
+          <section className="glass-card p-6 mb-6 border border-white/10 text-xs">
             <div className="flex items-center justify-between mb-3">
-              <span className="font-bold text-gray-400 uppercase tracking-wider">// SHOCK SEVERITY MAGNITUDE</span>
-              <span className="text-sm font-bold text-[#00D4FF]">
+              <span className="font-semibold text-gray-400 uppercase tracking-wider">Shock Severity Magnitude</span>
+              <span className="text-sm font-bold text-[#00D4FF] font-mono">
                 {getMagnitudeLabel(selectedScenario, magnitude)}
               </span>
             </div>
@@ -189,7 +189,7 @@ export default function StressTestPage() {
               onChange={(e) => setMagnitude(parseFloat(e.target.value))}
               className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-[#00D4FF]"
             />
-            <div className="flex justify-between text-[10px] text-gray-500 mt-2">
+            <div className="flex justify-between text-[11px] text-gray-400 mt-2">
               <span>10% Low</span>
               <span>50% Moderate</span>
               <span>90% Severe</span>
@@ -199,9 +199,9 @@ export default function StressTestPage() {
 
         {/* Loading indicator */}
         {loading && (
-          <div className="flex items-center gap-2 text-xs font-mono text-[#00D4FF] mb-4 animate-in">
+          <div className="flex items-center gap-2 text-xs text-[#00D4FF] mb-4 animate-in">
             <div className="w-3.5 h-3.5 border-2 border-[#00D4FF] border-t-transparent rounded-full animate-spin" />
-            <span>Executing XGBoost Stress Model...</span>
+            <span>Evaluating Stress Model...</span>
           </div>
         )}
 
@@ -210,37 +210,37 @@ export default function StressTestPage() {
           <div className="space-y-6 animate-in">
             {/* Score change */}
             <div className="glass-card p-6 border border-white/10">
-              <p className="text-xs font-mono font-bold text-gray-400 uppercase tracking-wider mb-4">// RESILIENCE IMPACT</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Resilience Impact</p>
               <ScoreChangeBar original={result.original_score} perturbed={result.perturbed_score} />
             </div>
 
             {/* Area chart */}
             {chartData.length > 1 && (
               <div className="glass-card p-6 border border-white/10">
-                <p className="text-xs font-mono font-bold text-gray-400 uppercase tracking-wider mb-4">// 12-MONTH RESILIENCE TRAJECTORY</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">12-Month Resilience Trajectory</p>
                 <div className="h-44 -mx-2">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                      <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#9CA3AF', fontFamily: 'IBM Plex Mono' }} />
+                      <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#9CA3AF', fontFamily: 'Plus Jakarta Sans, sans-serif' }} />
                       <YAxis domain={[0, 100]} hide />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: '#111827',
                           borderColor: 'rgba(255,255,255,0.1)',
                           borderRadius: '8px',
-                          fontFamily: 'IBM Plex Mono',
+                          fontFamily: 'Plus Jakarta Sans, sans-serif',
                           fontSize: '12px',
                           color: '#FFF',
                         }}
                         formatter={(v: unknown) => [v, 'Score']}
                       />
-                      {result.months_to_distress && (
+                      {result.months_to_distress !== null && (
                         <ReferenceLine
-                          x={`M${Math.floor(result.months_to_distress)}`}
+                          x={`Month ${Math.floor(result.months_to_distress)}`}
                           stroke="#EF4444"
                           strokeDasharray="4 2"
-                          label={{ value: 'Distress', fill: '#EF4444', fontSize: 10, fontFamily: 'IBM Plex Mono' }}
+                          label={{ value: 'Distress Point', fill: '#EF4444', fontSize: 10, fontFamily: 'Plus Jakarta Sans, sans-serif' }}
                         />
                       )}
                       <Area
@@ -263,37 +263,37 @@ export default function StressTestPage() {
               {result.months_to_distress !== null ? (
                 <div className="glass-card p-5 text-center border border-white/10">
                   <Clock size={18} className="mx-auto mb-1 text-amber-400" />
-                  <p className="text-2xl font-mono font-extrabold text-white tabular-nums">
+                  <p className="text-2xl font-extrabold text-white font-mono tabular-nums">
                     {result.months_to_distress.toFixed(0)}
                   </p>
-                  <p className="text-xs font-mono text-gray-400 mt-1">MONTHS RUNWAY BUFFER</p>
+                  <p className="text-xs text-gray-400 mt-1 uppercase font-semibold">Months Runway Buffer</p>
                 </div>
               ) : (
                 <div className="glass-card p-5 text-center border border-white/10">
                   <TrendingDown size={18} className="mx-auto mb-1 text-emerald-400" />
-                  <p className="text-base font-mono font-bold text-emerald-400 mt-1">STABLE SURPLUS</p>
-                  <p className="text-xs font-mono text-gray-400">Positive runway buffer</p>
+                  <p className="text-base font-bold text-emerald-400 mt-1">Stable Surplus</p>
+                  <p className="text-xs text-gray-400">Positive runway maintained</p>
                 </div>
               )}
-              <div className="glass-card p-5 text-center border border-white/10 font-mono">
+              <div className="glass-card p-5 text-center border border-white/10">
                 <Zap size={18} className="mx-auto mb-1 text-[#00D4FF]" />
-                <p className={`text-2xl font-extrabold tabular-nums ${result.score_delta < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                <p className={`text-2xl font-extrabold font-mono tabular-nums ${result.score_delta < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
                   {result.score_delta > 0 ? '+' : ''}{result.score_delta.toFixed(0)}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">SCORE DELTA</p>
+                <p className="text-xs text-gray-400 mt-1 uppercase font-semibold">Score Delta</p>
               </div>
             </div>
 
-            {/* Outcome summary + LLM explanation */}
-            <div className="glass-card p-6 border border-white/10 space-y-4 font-sans text-sm">
+            {/* Outcome summary + AI explanation */}
+            <div className="glass-card p-6 border border-white/10 space-y-4 text-sm">
               <p className="text-gray-300 leading-relaxed">
                 {result.outcome_summary}
               </p>
               {result.explanation_text && (
                 <div className="p-4 rounded-xl bg-amber-950/40 border border-amber-500/30 space-y-2">
-                  <div className="flex items-center gap-2 font-mono text-xs text-amber-400 font-bold">
+                  <div className="flex items-center gap-2 text-xs text-amber-400 font-bold">
                     <Sparkles size={14} />
-                    <span>LLAMA 3.1 AI RECOVERY PLAN</span>
+                    <span>Recovery Guidance</span>
                   </div>
                   <p className="text-gray-200 leading-relaxed text-xs">
                     "{result.explanation_text}"
@@ -303,7 +303,7 @@ export default function StressTestPage() {
             </div>
 
             {error && (
-              <p className="text-xs font-mono text-rose-400 bg-rose-950/70 border border-rose-500/30 rounded-xl px-4 py-3">{error}</p>
+              <p className="text-xs text-rose-400 bg-rose-950/70 border border-rose-500/30 rounded-xl px-4 py-3">{error}</p>
             )}
           </div>
         )}

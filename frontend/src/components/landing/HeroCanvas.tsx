@@ -4,7 +4,7 @@ const FRAME_COUNT = 240;
 
 const getFrameUrl = (index: number) => {
   const frameNumber = String(index + 1).padStart(4, '0');
-  return `/Images/${frameNumber}.jpg`;
+  return `/Images/${frameNumber}.jpg?v=2`;
 };
 
 export default function HeroCanvas() {

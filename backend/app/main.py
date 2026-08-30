@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.firebase import _init_firebase
-from app.routes import auth, accounts, dashboard, stress_test, loan
+from app.routes import auth, dashboard, stress_test, loan
 from app.schemas import HealthResponse
 
 # Initialize Firebase on startup
@@ -33,7 +33,7 @@ app.add_middleware(
 
 # Register routers
 app.include_router(auth.router)
-app.include_router(accounts.router)
+# app.include_router(accounts.router)  # demo accounts removed
 app.include_router(dashboard.router)
 app.include_router(stress_test.router)
 app.include_router(loan.router)

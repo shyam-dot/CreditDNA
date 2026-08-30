@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     class Config:
-        env_file = ".env"
+        env_file = [".env", "../.env"]
         extra = "ignore"
 
 

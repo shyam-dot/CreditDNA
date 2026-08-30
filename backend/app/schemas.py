@@ -18,33 +18,29 @@ class AuthSyncResponse(BaseModel):
     firebase_uid: str
     name: str
     email: str
-    has_linked_account: bool
+    has_onboarded: bool
+    has_linked_account: bool = True
 
 
+# ── Financial Entries ─────────────────────────────────────────────────────────
 
-# ── Demo Accounts ─────────────────────────────────────────────────────────────
-
-class DemoAccountOut(BaseModel):
-    id: str
-    holder_name: str
-    bank_name: str
-    account_suffix: str
-    display_label: str
-
-    class Config:
-        from_attributes = True
-
-
-# ── Link Account ──────────────────────────────────────────────────────────────
-
-class LinkAccountRequest(BaseModel):
-    demo_account_id: str
+class FinancialEntryCreate(BaseModel):
+    monthly_income: float
+    monthly_expenses_total: float
+    emi_amount: float
+    savings_balance: float
+    income_type: str = "salaried"  # "salaried" | "freelance"
+    employment_tenure_months: int = 12
+    missed_payments_last_year: int = 0
+    note: Optional[str] = "Monthly Financial Snapshot"
 
 
-class LinkAccountResponse(BaseModel):
-    message: str
-    demo_account_id: str
-    linked_at: datetime
+class ScoreHistoryPoint(BaseModel):
+    timestamp: str
+    score: float
+    band: str
+    monthly_income: float
+    savings_balance: float
 
 
 # ── DNA Scores ────────────────────────────────────────────────────────────────
@@ -97,18 +93,14 @@ class LoanRecommendationOut(BaseModel):
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
 
-class ConnectedAccountInfo(BaseModel):
-    holder_name: str
-    bank_name: str
-    account_suffix: str
-    demo_account_id: str
-
-
 class DashboardResponse(BaseModel):
-    connected_account: ConnectedAccountInfo
-    resilience_score: ResilienceScoreOut
-    dna: FinancialDNAOut
-    loan_recommendation: LoanRecommendationOut
+    user_name: str
+    user_email: str
+    has_onboarded: bool
+    resilience_score: Optional[ResilienceScoreOut] = None
+    dna: Optional[FinancialDNAOut] = None
+    loan_recommendation: Optional[LoanRecommendationOut] = None
+    score_history: List[ScoreHistoryPoint] = []
 
 
 # ── Stress Test ───────────────────────────────────────────────────────────────

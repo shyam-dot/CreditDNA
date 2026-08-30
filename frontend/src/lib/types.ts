@@ -58,11 +58,33 @@ export interface LoanRecommendation {
   computed_at: string;
 }
 
+export interface FinancialEntryCreate {
+  monthly_income: number;
+  monthly_expenses_total: number;
+  emi_amount: number;
+  savings_balance: number;
+  income_type: string;
+  employment_tenure_months: number;
+  missed_payments_last_year: number;
+  note?: string;
+}
+
+export interface ScoreHistoryPoint {
+  timestamp: string;
+  score: number;
+  band: ScoreBand;
+  monthly_income: number;
+  savings_balance: number;
+}
+
 export interface DashboardData {
-  connected_account: ConnectedAccountInfo;
-  resilience_score: ResilienceScore;
-  dna: FinancialDNA;
-  loan_recommendation: LoanRecommendation;
+  user_name: string;
+  user_email: string;
+  has_onboarded: boolean;
+  resilience_score: ResilienceScore | null;
+  dna: FinancialDNA | null;
+  loan_recommendation: LoanRecommendation | null;
+  score_history: ScoreHistoryPoint[];
 }
 
 export type ScenarioType = 'income_drop' | 'job_loss' | 'emergency_expense' | 'emi_increase';
@@ -88,6 +110,7 @@ export interface AuthSyncResponse {
   firebase_uid: string;
   name: string;
   email: string;
+  has_onboarded: boolean;
   has_linked_account: boolean;
 }
 

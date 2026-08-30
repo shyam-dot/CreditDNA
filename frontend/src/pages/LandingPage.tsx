@@ -6,7 +6,6 @@ import TransactionStreamInspector from '../components/landing/TransactionStreamI
 import StressTestSimulatorDemo from '../components/landing/StressTestSimulatorDemo';
 import ShapWaterfallCard from '../components/landing/ShapWaterfallCard';
 import DemoAccountSwitcher from '../components/landing/DemoAccountSwitcher';
-import ApiPlayground from '../components/landing/ApiPlayground';
 import HowItWorksSection from '../components/landing/HowItWorksSection';
 import RiskTerminalGrid from '../components/landing/RiskTerminalGrid';
 import TerminalFooter from '../components/landing/TerminalFooter';
@@ -35,16 +34,13 @@ export default function LandingPage() {
       {/* 6. Live Demo Account Switcher (Aisha Verma & Rahul Nair) */}
       <DemoAccountSwitcher />
 
-      {/* 7. Developer API & CLI Playground */}
-      <ApiPlayground />
-
-      {/* 8. How It Works (System Architecture) */}
+      {/* 7. How It Works (System Architecture) */}
       <HowItWorksSection />
 
-      {/* 9. Risk Terminal Feature Grid */}
+      {/* 8. Risk Feature Grid */}
       <RiskTerminalGrid />
 
-      {/* 10. Command Center Footer */}
+      {/* 9. Clean Modern Footer */}
       <TerminalFooter />
     </div>
   );

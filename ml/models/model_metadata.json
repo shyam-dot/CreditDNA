@@ -1,29 +1,26 @@
 {
   "best_model": "logistic_regression",
   "feature_names": [
-    "income_to_emi_ratio",
-    "savings_to_monthly_income_ratio",
-    "expense_to_income_ratio",
-    "missed_payment_rate",
-    "employment_tenure_years",
-    "debt_to_income_ratio",
-    "savings_months_of_expenses",
-    "income_volatility",
-    "is_salaried"
+    "income_stability",
+    "cash_flow_health",
+    "debt_pressure",
+    "savings_resilience",
+    "spending_stability",
+    "payment_discipline"
   ],
   "results": {
     "logistic_regression": {
-      "cv_auc": 0.9998267511837877,
-      "test_acc": 0.995
+      "cv_auc": 0.972889409278484,
+      "test_acc": 0.915
     },
     "random_forest": {
-      "cv_auc": 0.993777740887942,
-      "test_acc": 0.9466666666666667
+      "cv_auc": 0.9550653645101088,
+      "test_acc": 0.895
     },
     "xgboost": {
-      "cv_auc": 0.9961494992831554,
-      "test_acc": 0.9616666666666667
+      "cv_auc": 0.9582829039870366,
+      "test_acc": 0.905
     }
   },
-  "model_version": "v1.0"
+  "model_version": "v2.0-learned"
 }

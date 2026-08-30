@@ -2,21 +2,23 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   User,
   onAuthStateChanged,
+  signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
   updateProfile,
+  signOut as firebaseSignOut,
 } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { auth, googleProvider } from '../lib/firebase';
 import { syncUser } from '../lib/api';
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  hasLinkedAccount: boolean;
-  setHasLinkedAccount: (v: boolean) => void;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name: string) => Promise<{ isNewUser: boolean }>;
+  hasOnboarded: boolean;
+  setHasOnboarded: (v: boolean) => void;
+  signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -25,7 +27,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [hasLinkedAccount, setHasLinkedAccount] = useState(false);
+  const [hasOnboarded, setHasOnboarded] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -34,47 +36,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const syncResult = await syncUser(
             firebaseUser.uid,
-            firebaseUser.displayName || 'User',
+            firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
             firebaseUser.email || ''
           );
-          setHasLinkedAccount(syncResult.has_linked_account);
+          setHasOnboarded(syncResult.has_onboarded);
         } catch {
-          // Silently handle — user may not be in DB yet on first load
+          // Silently handle on initial load
         }
       } else {
-        setHasLinkedAccount(false);
+        setHasOnboarded(false);
       }
       setLoading(false);
     });
     return unsub;
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signInWithGoogle = async () => {
+    const cred = await signInWithPopup(auth, googleProvider);
+    const result = await syncUser(
+      cred.user.uid,
+      cred.user.displayName || cred.user.email?.split('@')[0] || 'User',
+      cred.user.email || ''
+    );
+    setHasOnboarded(result.has_onboarded);
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
     const cred = await signInWithEmailAndPassword(auth, email, password);
     const result = await syncUser(
       cred.user.uid,
-      cred.user.displayName || 'User',
+      cred.user.displayName || cred.user.email?.split('@')[0] || 'User',
       cred.user.email || ''
     );
-    setHasLinkedAccount(result.has_linked_account);
+    setHasOnboarded(result.has_onboarded);
   };
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUpWithEmail = async (name: string, email: string, password: string) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
-    await syncUser(cred.user.uid, name, email);
-    setHasLinkedAccount(false);
-    return { isNewUser: true };
+    const result = await syncUser(cred.user.uid, name, cred.user.email || '');
+    setHasOnboarded(result.has_onboarded);
   };
 
   const signOut = async () => {
     await firebaseSignOut(auth);
-    setHasLinkedAccount(false);
+    setHasOnboarded(false);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, hasLinkedAccount, setHasLinkedAccount, signIn, signUp, signOut }}
+      value={{
+        user,
+        loading,
+        hasOnboarded,
+        setHasOnboarded,
+        signInWithGoogle,
+        signInWithEmail,
+        signUpWithEmail,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>
@@ -86,3 +106,4 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
+

@@ -41,7 +41,7 @@ def _perturb_profile(
     magnitude = max(0.0, min(magnitude, 1.0))
 
     if scenario == "income_drop":
-        p["monthly_income"] *= 1 - magnitude
+        p["monthly_income"] = max(0.0, float(p.get("monthly_income", 0.0)) * (1.0 - magnitude))
 
     elif scenario == "job_loss":
         p["monthly_income"] = 0.0
@@ -49,14 +49,19 @@ def _perturb_profile(
         p["employment_tenure_months"] = 0
 
     elif scenario == "emergency_expense":
-        p["savings_balance"] *= 1 - magnitude
+        current_savings = float(p.get("savings_balance", 0.0))
+        # If user has savings, deplete by magnitude (e.g. 50% drain); if savings is 0 or low, shock adds to expense obligations
+        if current_savings > 1000:
+            p["savings_balance"] = max(0.0, current_savings * (1.0 - magnitude))
+        else:
+            p["savings_balance"] = 0.0
+            p["monthly_expenses_total"] = float(p.get("monthly_expenses_total", 0.0)) * (1.0 + magnitude * 0.5)
 
     elif scenario == "emi_increase":
-        p["emi_amount"] *= 1 + magnitude
-        # Reflect higher total debt
+        p["emi_amount"] = float(p.get("emi_amount", 0.0)) * (1.0 + magnitude)
         if p.get("existing_loans"):
             for loan in p["existing_loans"]:
-                loan["emi"] = loan.get("emi", 0) * (1 + magnitude)
+                loan["emi"] = float(loan.get("emi", 0.0)) * (1.0 + magnitude)
 
     return p
 
@@ -68,14 +73,14 @@ def _estimate_months_to_distress(
     Estimate how many months of savings runway the person has after the shock.
     Returns None if financially stable (positive monthly surplus).
     """
-    income = perturbed["monthly_income"]
-    expenses = perturbed["monthly_expenses_total"]
-    emi = perturbed["emi_amount"]
-    savings = perturbed["savings_balance"]
+    income = float(perturbed.get("monthly_income", 0.0))
+    expenses = float(perturbed.get("monthly_expenses_total", 0.0))
+    emi = float(perturbed.get("emi_amount", 0.0))
+    savings = float(perturbed.get("savings_balance", 0.0))
 
     monthly_deficit = (expenses + emi) - income
     if monthly_deficit <= 0:
-        return None  # Surplus — not heading to distress
+        return None  # Surplus — maintaining monthly cash flow
 
     if savings <= 0:
         return 0.0
