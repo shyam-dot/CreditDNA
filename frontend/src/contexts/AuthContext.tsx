@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import {
   User,
   onAuthStateChanged,
@@ -28,62 +28,84 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasOnboarded, setHasOnboarded] = useState(false);
+  const loadingDone = useRef(false);
+
+  const finishLoading = () => {
+    if (!loadingDone.current) {
+      loadingDone.current = true;
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
+    // Hard timeout: never stay in loading state for more than 3 seconds
+    const globalTimeout = setTimeout(() => {
+      finishLoading();
+    }, 3000);
+
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      clearTimeout(globalTimeout);
       setUser(firebaseUser);
+
       if (firebaseUser) {
-        try {
-          // Timeout after 6 seconds so app never hangs if backend is slow
-          const timeout = new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('sync timeout')), 6000)
-          );
-          const syncResult = await Promise.race([
-            syncUser(
-              firebaseUser.uid,
-              firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-              firebaseUser.email || ''
-            ),
-            timeout,
-          ]);
-          setHasOnboarded(syncResult.has_onboarded);
-        } catch {
-          // Backend unreachable or timed out — still allow app to proceed
-          setHasOnboarded(false);
-        }
+        // Try to sync with backend but don't block the UI
+        syncUser(
+          firebaseUser.uid,
+          firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+          firebaseUser.email || ''
+        )
+          .then((res) => setHasOnboarded(res.has_onboarded))
+          .catch(() => setHasOnboarded(false));
       } else {
         setHasOnboarded(false);
       }
-      setLoading(false);
+
+      finishLoading();
     });
-    return unsub;
+
+    return () => {
+      clearTimeout(globalTimeout);
+      unsub();
+    };
   }, []);
 
   const signInWithGoogle = async () => {
     const cred = await signInWithPopup(auth, googleProvider);
-    const result = await syncUser(
-      cred.user.uid,
-      cred.user.displayName || cred.user.email?.split('@')[0] || 'User',
-      cred.user.email || ''
-    );
-    setHasOnboarded(result.has_onboarded);
+    try {
+      const result = await syncUser(
+        cred.user.uid,
+        cred.user.displayName || cred.user.email?.split('@')[0] || 'User',
+        cred.user.email || ''
+      );
+      setHasOnboarded(result.has_onboarded);
+    } catch {
+      setHasOnboarded(false);
+    }
   };
 
   const signInWithEmail = async (email: string, password: string) => {
     const cred = await signInWithEmailAndPassword(auth, email, password);
-    const result = await syncUser(
-      cred.user.uid,
-      cred.user.displayName || cred.user.email?.split('@')[0] || 'User',
-      cred.user.email || ''
-    );
-    setHasOnboarded(result.has_onboarded);
+    try {
+      const result = await syncUser(
+        cred.user.uid,
+        cred.user.displayName || cred.user.email?.split('@')[0] || 'User',
+        cred.user.email || ''
+      );
+      setHasOnboarded(result.has_onboarded);
+    } catch {
+      setHasOnboarded(false);
+    }
   };
 
   const signUpWithEmail = async (name: string, email: string, password: string) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
-    const result = await syncUser(cred.user.uid, name, cred.user.email || '');
-    setHasOnboarded(result.has_onboarded);
+    try {
+      const result = await syncUser(cred.user.uid, name, cred.user.email || '');
+      setHasOnboarded(result.has_onboarded);
+    } catch {
+      setHasOnboarded(false);
+    }
   };
 
   const signOut = async () => {
@@ -114,4 +136,3 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
-
