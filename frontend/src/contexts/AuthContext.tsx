@@ -34,14 +34,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(firebaseUser);
       if (firebaseUser) {
         try {
-          const syncResult = await syncUser(
-            firebaseUser.uid,
-            firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-            firebaseUser.email || ''
+          // Timeout after 6 seconds so app never hangs if backend is slow
+          const timeout = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('sync timeout')), 6000)
           );
+          const syncResult = await Promise.race([
+            syncUser(
+              firebaseUser.uid,
+              firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+              firebaseUser.email || ''
+            ),
+            timeout,
+          ]);
           setHasOnboarded(syncResult.has_onboarded);
         } catch {
-          // Silently handle on initial load
+          // Backend unreachable or timed out — still allow app to proceed
+          setHasOnboarded(false);
         }
       } else {
         setHasOnboarded(false);
