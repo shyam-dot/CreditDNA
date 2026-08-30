@@ -174,16 +174,20 @@ def _get_lr_model():
     global _cached_model
     if _cached_model is not None:
         return _cached_model
-    import os
-    import joblib
-    models_dir = os.path.join(os.path.dirname(__file__), "models")
-    model_path = os.path.join(models_dir, "logistic_regression.joblib")
-    if os.path.exists(model_path):
-        try:
-            _cached_model = joblib.load(model_path)
-            return _cached_model
-        except Exception:
-            pass
+    try:
+        import os
+        import joblib
+        models_dir = os.path.join(os.path.dirname(__file__), "models")
+        model_path = os.path.join(models_dir, "logistic_regression.joblib")
+        if os.path.exists(model_path):
+            try:
+                _cached_model = joblib.load(model_path)
+                return _cached_model
+            except Exception:
+                pass
+    except ImportError:
+        # joblib not available (e.g., Vercel serverless) — formula-based scoring is used instead
+        pass
     return None
 
 
