@@ -19,6 +19,7 @@ interface AuthContextValue {
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (name: string, email: string, password: string) => Promise<void>;
+  signInDemo: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -38,17 +39,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Hard timeout: never stay in loading state for more than 3 seconds
+    // Check if demo user is stored in session
+    const demoUser = sessionStorage.getItem('creditdna_demo_user');
+    if (demoUser) {
+      try {
+        const parsed = JSON.parse(demoUser);
+        setUser(parsed as unknown as User);
+        setHasOnboarded(true);
+        finishLoading();
+        return;
+      } catch {
+        sessionStorage.removeItem('creditdna_demo_user');
+      }
+    }
+
+    // Hard timeout: max 2.5s waiting for Firebase initialization
     const globalTimeout = setTimeout(() => {
       finishLoading();
-    }, 3000);
+    }, 2500);
 
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       clearTimeout(globalTimeout);
       setUser(firebaseUser);
 
       if (firebaseUser) {
-        // Try to sync with backend but don't block the UI
+        // Fire-and-forget sync: never block the UI
         syncUser(
           firebaseUser.uid,
           firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
@@ -70,46 +85,79 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
-    const cred = await signInWithPopup(auth, googleProvider);
-    try {
-      const result = await syncUser(
-        cred.user.uid,
-        cred.user.displayName || cred.user.email?.split('@')[0] || 'User',
-        cred.user.email || ''
-      );
-      setHasOnboarded(result.has_onboarded);
-    } catch {
-      setHasOnboarded(false);
-    }
+    // With 15s safety timeout
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Google sign-in timed out. Please try again or use email login.')), 15000)
+    );
+    const cred = await Promise.race([
+      signInWithPopup(auth, googleProvider),
+      timeout
+    ]);
+    
+    syncUser(
+      cred.user.uid,
+      cred.user.displayName || cred.user.email?.split('@')[0] || 'User',
+      cred.user.email || ''
+    )
+      .then((res) => setHasOnboarded(res.has_onboarded))
+      .catch(() => setHasOnboarded(false));
   };
 
   const signInWithEmail = async (email: string, password: string) => {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    try {
-      const result = await syncUser(
-        cred.user.uid,
-        cred.user.displayName || cred.user.email?.split('@')[0] || 'User',
-        cred.user.email || ''
-      );
-      setHasOnboarded(result.has_onboarded);
-    } catch {
-      setHasOnboarded(false);
-    }
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Authentication timed out. Check your connection.')), 10000)
+    );
+    const cred = await Promise.race([
+      signInWithEmailAndPassword(auth, email, password),
+      timeout
+    ]);
+
+    syncUser(
+      cred.user.uid,
+      cred.user.displayName || cred.user.email?.split('@')[0] || 'User',
+      cred.user.email || ''
+    )
+      .then((res) => setHasOnboarded(res.has_onboarded))
+      .catch(() => setHasOnboarded(false));
   };
 
   const signUpWithEmail = async (name: string, email: string, password: string) => {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Registration timed out. Check your connection.')), 10000)
+    );
+    const cred = await Promise.race([
+      createUserWithEmailAndPassword(auth, email, password),
+      timeout
+    ]);
     await updateProfile(cred.user, { displayName: name });
-    try {
-      const result = await syncUser(cred.user.uid, name, cred.user.email || '');
-      setHasOnboarded(result.has_onboarded);
-    } catch {
-      setHasOnboarded(false);
-    }
+    syncUser(cred.user.uid, name, cred.user.email || '')
+      .then((res) => setHasOnboarded(res.has_onboarded))
+      .catch(() => setHasOnboarded(false));
+  };
+
+  const signInDemo = async () => {
+    const mockDemoUser = {
+      uid: 'mock_token_demo_user',
+      displayName: 'Alex Morgan',
+      email: 'alex.morgan@example.com',
+      getIdToken: async () => 'mock_token_demo_user',
+    };
+    sessionStorage.setItem('creditdna_demo_user', JSON.stringify(mockDemoUser));
+    setUser(mockDemoUser as unknown as User);
+    setHasOnboarded(true);
+    syncUser('mock_token_demo_user', 'Alex Morgan', 'alex.morgan@example.com')
+      .then((res) => setHasOnboarded(res.has_onboarded))
+      .catch(() => setHasOnboarded(false));
   };
 
   const signOut = async () => {
-    await firebaseSignOut(auth);
+    sessionStorage.removeItem('creditdna_demo_user');
+    try {
+      await firebaseSignOut(auth);
+    } catch {
+      // Ignore signOut errors
+    }
+    setUser(null);
     setHasOnboarded(false);
   };
 
@@ -123,6 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInWithGoogle,
         signInWithEmail,
         signUpWithEmail,
+        signInDemo,
         signOut,
       }}
     >
